@@ -59,19 +59,24 @@ func main() {
 	apiRouter := chi.NewRouter()
 	apiRouter.Get("/readiness", handlerReadiness)
 	apiRouter.Get("/err", handlerError)
+
 	apiRouter.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
 	apiRouter.Post("/users", apiCfg.handlerCreateUser)
 
 	apiRouter.Get("/feeds", apiCfg.handlerGetFeeds)
 	apiRouter.Post("/feeds", apiCfg.middlewareAuth(apiCfg.handlerCreateFeed))
 
+	apiRouter.Get("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerGetFeedFollows))
+	apiRouter.Post("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerCreateFeedFollow))
+	apiRouter.Delete("/feed_follows/{feedFollowID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteFeedFollow))
+
 	router.Mount("/v1", apiRouter)
 
-	srv := &http.Server{
+	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: router,
 	}
 
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
-	log.Fatal(srv.ListenAndServe())
+	log.Fatal(server.ListenAndServe())
 }
