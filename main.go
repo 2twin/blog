@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/2twin/blog/internal/database"
 	"github.com/go-chi/chi/v5"
@@ -18,6 +19,12 @@ type apiConfig struct {
 }
 
 func main() {
+	// feed, err := urlToFeed("https://wagslane.dev/index.xml")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(feed)
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Couldn't find .env file")
@@ -43,6 +50,8 @@ func main() {
 	apiCfg := apiConfig{
 		DB: dbQueries,
 	}
+
+	go startScraping(dbQueries, 10, time.Minute)
 
 	router := chi.NewRouter()
 	router.Use(cors.Handler(
